@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e -o pipefail
+
+main() {
+    list-files "$@" | annotate | summarize
+}
+
+list-files() {
+    if [[ $# -gt 0 ]]; then
+        printf '%s\n' "$@"
+    else
+        git ls-files
+    fi
+}
+
+annotate() {
+    parallel --halt-on-error now,fail=1 --line-buffer \
+        git annotate -CCC -M --line-porcelain {}
+}
+
+summarize() {
+    perl -MList::Util=max,sum -ne '
+        next unless s/^author //;
+        chomp;
+
+        $authors{ $_ }++;
+
+        END {
+            my $length = 1 + max map { length } values %authors;
+            my $total  = sum values %authors;
+
+            printf "%*d  %3.0f%%  %s\n", $length, $authors{$_}, $authors{$_} / $total * 100, $_
+                for sort { $authors{$b} <=> $authors{$a} }
+                    keys %authors;
+        }
+    '
+}
+
+main "$@"
