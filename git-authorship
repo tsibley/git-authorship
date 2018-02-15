@@ -2,6 +2,13 @@
 set -e -o pipefail
 
 main() {
+    # Pull the first revision out of the args, if any.  Default to HEAD.
+    local revision="$(git rev-parse --revs-only "$@" | head -n1)"
+    : ${revision:=HEAD}
+
+    # Remove any revisions from the front of args.  What remains should be files.
+    eval "set -- $(git rev-parse --sq --no-revs "$@")"
+
     list-files "$@" | annotate | summarize
 }
 
@@ -9,13 +16,13 @@ list-files() {
     if [[ $# -gt 0 ]]; then
         printf '%s\n' "$@"
     else
-        git ls-files
+        git ls-tree -r --name-only "$revision"
     fi
 }
 
 annotate() {
     parallel --halt-on-error now,fail=1 --line-buffer \
-        git annotate -CCC -M --line-porcelain {}
+        git blame -CCC -M --line-porcelain "$revision" -- {}
 }
 
 summarize() {
