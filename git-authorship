@@ -13,11 +13,7 @@ main() {
 }
 
 list-files() {
-    if [[ $# -gt 0 ]]; then
-        printf '%s\n' "$@"
-    else
-        git ls-tree -r --name-only "$revision"
-    fi
+    git ls-tree -r --name-only "$revision" -- "$@"
 }
 
 annotate() {
