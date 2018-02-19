@@ -11,3 +11,15 @@ counts commits instead of lines.
 Provide a revision to use a specific point-in-time instead of the
 current HEAD.  Provide paths to limit to a set of files or
 directories.
+
+## Installation
+
+Copy `git-authorship` into your `PATH` anywhere you'd like, or run
+
+    make install
+
+to copy it into `/usr/local/bin`.  You can run
+
+    make install prefix=$HOME
+
+to put it in `$HOME/bin`, if you'd prefer.
