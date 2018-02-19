@@ -1,7 +1,21 @@
 #!/bin/bash
+# usage: git authorship [<revision>] [-- <paths...>]
+#
+# Summarizes authorship of a repository by the current number of lines.
+#
+# This is a more fine-grained version of `git shortlog -ns`, which counts
+# commits instead of lines.
+#
+# Provide a revision to use a specific point-in-time instead of the current
+# HEAD.  Provide paths to limit to a set of files or directories.
+
 set -e -o pipefail
 
 main() {
+    if [[ $1 == "-h" || $1 == "--help" ]]; then
+        usage; exit
+    fi
+
     # Pull the first revision out of the args, if any.  Default to HEAD.
     local revision="$(git rev-parse --revs-only "$@" | head -n1)"
     : "${revision:=HEAD}"
@@ -14,6 +28,10 @@ main() {
     eval "set -- $(git rev-parse --sq --no-revs --no-flags "$@")"
 
     list-files "$@" | annotate | summarize
+}
+
+usage() {
+    perl -ne '2 .. not s/^# ?// ? print : exit' -- "$0"
 }
 
 list-files() {
