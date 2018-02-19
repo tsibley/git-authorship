@@ -6,8 +6,12 @@ main() {
     local revision="$(git rev-parse --revs-only "$@" | head -n1)"
     : "${revision:=HEAD}"
 
-    # Remove any revisions from the front of args.  What remains should be files.
-    eval "set -- $(git rev-parse --sq --no-revs "$@")"
+    # Pull flags out of the args, if any.
+    local blame_opts="$(git rev-parse --no-revs --flags "$@")"
+
+    # Remove any revisions and flags from the front of args.  What remains
+    # should be files.
+    eval "set -- $(git rev-parse --sq --no-revs --no-flags "$@")"
 
     list-files "$@" | annotate | summarize
 }
@@ -18,7 +22,7 @@ list-files() {
 
 annotate() {
     parallel --halt-on-error now,fail=1 --line-buffer \
-        git blame -CCC -M --line-porcelain "$revision" -- {}
+        git blame -CCC -M --line-porcelain $blame_opts "$revision" -- {}
 }
 
 summarize() {
