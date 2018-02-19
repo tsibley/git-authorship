@@ -21,8 +21,16 @@ list-files() {
 }
 
 annotate() {
-    parallel --null --halt-on-error now,fail=1 --line-buffer \
-        git blame -CCC -M --line-porcelain $blame_opts "$revision" -- {}
+    # I was somewhat surprised to find that a simple read loop is much faster
+    # than using GNU Parallel with line buffering (which we need).  This was
+    # reliably demonstrated on the Viroverse repository (over 220k lines) on my
+    # personal laptop, which has 4 cores, 8GB RAM, and an SSD.  It makes for
+    # less deps too, which is nice as GNU Parallel can sometimes be hard to
+    # come by with distro packages.
+
+    while read -r -d $'\0' fname; do
+        git blame -CCC -M --line-porcelain $blame_opts "$revision" -- "$fname"
+    done
 }
 
 summarize() {
