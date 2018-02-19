@@ -46,7 +46,7 @@ annotate() {
     # less deps too, which is nice as GNU Parallel can sometimes be hard to
     # come by with distro packages.
 
-    while read -r -d $'\0' fname; do
+    while IFS="" read -r -d $'\0' fname; do
         git blame -CCC -M --line-porcelain $blame_opts "$revision" -- "$fname"
     done
 }
