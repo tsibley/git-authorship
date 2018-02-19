@@ -4,7 +4,7 @@ set -e -o pipefail
 main() {
     # Pull the first revision out of the args, if any.  Default to HEAD.
     local revision="$(git rev-parse --revs-only "$@" | head -n1)"
-    : ${revision:=HEAD}
+    : "${revision:=HEAD}"
 
     # Remove any revisions from the front of args.  What remains should be files.
     eval "set -- $(git rev-parse --sq --no-revs "$@")"
