@@ -17,11 +17,11 @@ main() {
 }
 
 list-files() {
-    git ls-tree -r --name-only "$revision" -- "$@"
+    git ls-tree -r --name-only -z "$revision" -- "$@"
 }
 
 annotate() {
-    parallel --halt-on-error now,fail=1 --line-buffer \
+    parallel --null --halt-on-error now,fail=1 --line-buffer \
         git blame -CCC -M --line-porcelain $blame_opts "$revision" -- {}
 }
 
