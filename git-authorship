@@ -7,9 +7,12 @@
 # commits instead of lines.
 #
 # Provide a revision to use a specific point-in-time instead of the current
-# HEAD.  Provide paths to limit to a set of files or directories.
+# HEAD.  Provide paths to limit to a set of files or directories.  You may
+# exclude certain paths by prefixing them with a ! (bang).  Note that paths are
+# actually basic globs as interpreted by git ls-tree and bash pattern matching.
 
 set -e -o pipefail
+shopt -s extglob
 
 main() {
     if [[ $1 == "-h" || $1 == "--help" ]]; then
@@ -35,7 +38,47 @@ usage() {
 }
 
 list-files() {
-    git ls-tree -r --name-only -z "$revision" -- "$@"
+    # Any files (patterns) prefixed with a bang (!) are exclusion prefixes that
+    # should be removed from the output of git ls-tree.
+    local -a include exclude
+
+    for pattern; do
+        case "$pattern" in
+            !*)
+                exclude+=("${pattern#\!}")
+                shift;;
+            *)
+                include+=("$pattern")
+                shift;;
+        esac
+    done
+
+    git ls-tree -r --name-only -z "$revision" -- "${include[@]}" \
+        | exclude-files "${exclude[@]}"
+}
+
+exclude-files() {
+    # Supports globbing, like git ls-tree.  All patterns must match the full
+    # path.  Patterns ending in / automatically have a * appended so as to
+    # exclude the whole subtree.  This parallels the behaviour of included path
+    # patterns with git ls-tree's -r option.
+    if [[ $# -eq 0 ]]; then
+        cat
+    else
+        local patterns="$(join '|' "${@/%\//\/*}")"
+
+        while IFS="" read -r -d $'\0' fname; do
+            if [[ $fname != @($patterns) ]]; then
+                printf '%s\0' "$fname"
+            fi
+        done
+    fi
+}
+
+join() {
+    local IFS="$1"
+    shift
+    echo "$*"
 }
 
 annotate() {

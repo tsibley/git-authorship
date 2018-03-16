@@ -10,7 +10,9 @@ counts commits instead of lines.
 
 Provide a revision to use a specific point-in-time instead of the
 current HEAD.  Provide paths to limit to a set of files or
-directories.
+directories.  You may exclude certain paths by prefixing them with a
+`!` (bang).  Note that paths are actually basic globs as interpreted
+by `git ls-tree` and bash pattern matching.
 
 ## Installation
 
