@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: git authorship [<revision>] [-- <paths...>]
+# usage: git authorship [<options>] [<revision>] [-- <paths...>]
 #
 # Summarizes authorship of a repository by the current number of lines.
 #
@@ -10,6 +10,12 @@
 # HEAD.  Provide paths to limit to a set of files or directories.  You may
 # exclude certain paths by prefixing them with a ! (bang).  Note that paths are
 # actually basic globs as interpreted by git ls-tree and bash pattern matching.
+#
+# Any options provided are passed to git blame, although only one makes sense:
+#
+#    -w    ignore whitespace when tracing the origins of lines
+#
+# This is useful to avoid attributing whitespace-only changes to people.
 
 set -e -o pipefail
 shopt -s extglob
