@@ -16,7 +16,7 @@ by `git ls-tree` and bash pattern matching.
 
 Any options provided are passed to git blame, although only one makes sense:
 
-   -w    ignore whitespace when tracing the origins of lines
+    -w    ignore whitespace when tracing the origins of lines
 
 This is useful to avoid attributing whitespace-only changes to people.
 
